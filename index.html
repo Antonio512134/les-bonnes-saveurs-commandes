@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les Bonnes Saveurs - Commandes</title>
+<style>
+*{box-sizing:border-box}
+body{
+background:#151515;
+color:white;
+font-family:Arial,sans-serif;
+margin:0;
+padding:16px;
+}
+main{max-width:650px;margin:auto}
+h1,h2{color:#d4af37}
+header{text-align:center;padding:15px}
+.produit{
+background:#222;
+border:1px solid #66552b;
+border-radius:12px;
+padding:15px;
+margin-bottom:12px;
+}
+.ligne{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+margin:12px 0;
+}
+input,textarea{
+font-size:16px;
+padding:12px;
+border-radius:8px;
+border:1px solid #aaa;
+}
+input[type=number]{width:65px}
+.champ{
+display:block;
+width:100%;
+margin:8px 0 16px;
+}
+button{
+background:#d4af37;
+color:#111;
+border:0;
+border-radius:10px;
+padding:16px;
+font-size:17px;
+font-weight:bold;
+width:100%;
+}
+.total{
+font-size:26px;
+color:#d4af37;
+text-align:center;
+margin:20px 0;
+}
+small{color:#ccc}
+footer{text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>LES BONNES SAVEURS SÀRL</h1>
+<p>Boucherie fine & Traiteur</p>
+<h2>LE GÉANT</h2>
+<p>Commandez vos sandwichs</p>
+</header>
+
+<div id="menu"></div>
+
+<form id="commande">
+<h2>Informations de retrait</h2>
+<label>Votre prénom</label>
+<input class="champ" id="prenom" required>
+<label>Date de retrait</label>
+<input class="champ" type="date" id="date" required>
+<label>Heure de retrait</label>
+<input class="champ" type="time" id="heure" required>
+<label>Remarques particulières</label>
+<textarea class="champ" id="remarques" placeholder="Sans oignons, sans tomates..."></textarea>
+
+<div class="total" id="total">Total : CHF 0.00</div>
+
+<button type="submit">
+Commander sur WhatsApp
+</button>
+<p><small>Commande sous réserve de confirmation du magasin.</small></p>
+</form>
+
+<footer>
+<h2>11 achetés, le 12e offert !</h2>
+<p>Le Demi ou Le Géant, à vous de choisir.</p>
+<small>Hors sandwichs au foie gras et au Wagyu.</small>
+<p>Place de la Paix 1<br>1820 Montreux</p>
+</footer>
+</main>
+
+<script>
+const menu = [
+["Le Coin Coin",16.90,24.90],
+["Cécina Wagyu × Angus",16.90,24.90],
+["Viande séchée",12.90,16.90],
+["Effiloché de canard confit",12.90,16.90],
+["Roastbeef maison",10.90,14.90],
+["Jambon cru",10.90,14.90],
+["Poulet rôti",9.90,13.90],
+["Mortadelle",9.90,13.90],
+["Salami bœuf et porc",9.90,13.90],
+["Chorizo de volaille",9.90,13.90],
+["Salami pur bœuf",9.90,12.90],
+["Jambon / Fromage",9.90,12.90]
+];
+
+document.getElementById("menu").innerHTML =
+menu.map((p,i)=>`
+<div class="produit">
+<h3>${p[0]}</h3>
+<div class="ligne">
+<span>Demi 15 cm<br>CHF ${p[1].toFixed(2)}</span>
+<input form="commande" aria-label="${p[0]} Demi" type="number" min="0" max="99" step="1"
+value="0" id="q${i}d" oninput="calculer()">
+</div>
+<div class="ligne">
+<span>Géant 30 cm<br>CHF ${p[2].toFixed(2)}</span>
+<input form="commande" aria-label="${p[0]} Géant" type="number" min="0" max="99" step="1"
+value="0" id="q${i}g" oninput="calculer()">
+</div>
+</div>`).join("");
+
+function quantite(id){
+return Math.max(0,Math.floor(Number(document.getElementById(id).value)||0));
+}
+
+function calculer(){
+let total=0;
+menu.forEach((p,i)=>{
+total+=quantite("q"+i+"d")*p[1];
+total+=quantite("q"+i+"g")*p[2];
+});
+document.getElementById("total").textContent=
+"Total : CHF "+total.toFixed(2);
+return total;
+}
+
+document.getElementById("commande").onsubmit=function(e){
+e.preventDefault();
+let total=calculer();
+if(total===0){
+alert("Veuillez choisir un sandwich.");
+return;
+}
+let message="Bonjour Les Bonnes Saveurs,\n\nVoici ma commande :\n";
+menu.forEach((p,i)=>{
+let d=quantite("q"+i+"d");
+let g=quantite("q"+i+"g");
+if(d>0)message+=d+" x "+p[0]+" - 15 cm\n";
+if(g>0)message+=g+" x "+p[0]+" - 30 cm\n";
+});
+message+="\nTotal TTC : CHF "+total.toFixed(2);
+message+="\nPrénom : "+document.getElementById("prenom").value;
+message+="\nDate : "+document.getElementById("date").value;
+message+="\nHeure : "+document.getElementById("heure").value;
+message+="\nRemarques : "+document.getElementById("remarques").value;
+window.location.href="https://wa.me/41774627413?text="+encodeURIComponent(message);
+};
+</script>
+</body>
+</html>
